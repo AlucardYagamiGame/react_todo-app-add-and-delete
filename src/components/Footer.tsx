@@ -1,6 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
-import { FilterType } from '../types/FilterType';
+import type { FilterType } from '../types/FilterType';
 import { Todo } from '../types/Todo';
 
 type Props = {

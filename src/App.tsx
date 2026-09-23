@@ -4,7 +4,7 @@ import { ErrorNotification } from './components/ErrorNotification';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { TodoList } from './components/TodoList';
-import { FilterType } from './types/FilterType';
+import type { FilterType } from './types/FilterType';
 import { ErrorMessage } from './types/ErrorMessage';
 import { Todo } from './types/Todo';
 import { UserWarning } from './UserWarning';
