@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import cn from 'classnames';
+import React, { useEffect, useState } from 'react';
 import { createTodo, deleteTodo, getTodos, USER_ID } from './api/todos';
 import { ErrorNotification } from './components/ErrorNotification';
+import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import { NewTodo } from './components/NewTodo';
 import { TodoList } from './components/TodoList';
 import { FilterType } from './types/FilterType';
 import { ErrorMessage } from './types/ErrorMessage';
@@ -20,8 +19,6 @@ export const App: React.FC = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | null>(null);
 
-  const newTodoFieldRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     if (!USER_ID) {
       return;
@@ -37,16 +34,12 @@ export const App: React.FC = () => {
       return;
     }
 
-    const timerId = window.setTimeout(() => {
+    const timerId = setTimeout(() => {
       setErrorMessage(null);
     }, ERROR_TIMEOUT);
 
-    return () => window.clearTimeout(timerId);
+    return () => clearTimeout(timerId);
   }, [errorMessage]);
-
-  useEffect(() => {
-    newTodoFieldRef.current?.focus();
-  }, [isSubmitting, todos]);
 
   const handleAddTodo = async (title: string) => {
     setIsSubmitting(true);
@@ -88,50 +81,48 @@ export const App: React.FC = () => {
       });
   };
 
-  const handleClearCompleted = () => {
-    const completedTodoIds = todos
-      .filter(todo => todo.completed)
-      .map(todo => todo.id);
+  const handleClearCompleted = async () => {
+    const completedTodos = todos.filter(todo => todo.completed);
+    const completedIds = completedTodos.map(todo => todo.id);
 
-    setLoadingTodoIds(currentIds => [...currentIds, ...completedTodoIds]);
+    setLoadingTodoIds(currentIds => [...currentIds, ...completedIds]);
 
-    Promise.allSettled(
-      completedTodoIds.map(todoId => deleteTodo(todoId).then(() => todoId)),
-    )
-      .then(results => {
-        const deletedIds = results
-          .filter(
-            (result): result is PromiseFulfilledResult<number> =>
-              result.status === 'fulfilled',
-          )
-          .map(result => result.value);
+    const deletedIds: number[] = [];
+    let hasError = false;
 
-        if (results.some(result => result.status === 'rejected')) {
-          setErrorMessage(ErrorMessage.DELETE);
+    await Promise.all(
+      completedIds.map(async id => {
+        try {
+          await deleteTodo(id);
+          deletedIds.push(id);
+        } catch {
+          hasError = true;
         }
+      }),
+    );
 
-        setTodos(currentTodos =>
-          currentTodos.filter(todo => !deletedIds.includes(todo.id)),
-        );
-      })
-      .finally(() => {
-        setLoadingTodoIds(currentIds =>
-          currentIds.filter(id => !completedTodoIds.includes(id)),
-        );
-      });
+    if (hasError) {
+      setErrorMessage(ErrorMessage.DELETE);
+    }
+
+    setTodos(currentTodos =>
+      currentTodos.filter(todo => !deletedIds.includes(todo.id)),
+    );
+    setLoadingTodoIds(currentIds =>
+      currentIds.filter(id => !completedIds.includes(id)),
+    );
   };
 
   const visibleTodos = todos.filter(todo => {
-    switch (filter) {
-      case 'active':
-        return !todo.completed;
-
-      case 'completed':
-        return todo.completed;
-
-      default:
-        return true;
+    if (filter === 'active') {
+      return !todo.completed;
     }
+
+    if (filter === 'completed') {
+      return todo.completed;
+    }
+
+    return true;
   });
 
   if (!USER_ID) {
@@ -145,24 +136,13 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <header className="todoapp__header">
-          {/* this button should have `active` class only if all todos are completed */}
-          <button
-            type="button"
-            data-cy="ToggleAllButton"
-            aria-label="Toggle all todos"
-            className={cn('todoapp__toggle-all', {
-              active: isAllCompleted,
-            })}
-          />
-
-          <NewTodo
-            isSubmitting={isSubmitting}
-            inputRef={newTodoFieldRef}
-            onAdd={handleAddTodo}
-            onError={setErrorMessage}
-          />
-        </header>
+        <Header
+          isAllCompleted={isAllCompleted}
+          isSubmitting={isSubmitting}
+          todos={todos}
+          onAdd={handleAddTodo}
+          onError={setErrorMessage}
+        />
 
         {(todos.length > 0 || tempTodo) && (
           <TodoList
