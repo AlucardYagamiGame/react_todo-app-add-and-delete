@@ -1,6 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
-import type { FilterType } from '../types/FilterType';
+import { FilterType } from '../types/FilterType';
 import { Todo } from '../types/Todo';
 
 type Props = {
@@ -18,15 +18,15 @@ type FilterLink = {
 };
 
 const FILTER_LINKS: FilterLink[] = [
-  { value: 'all', href: '#/', label: 'All', dataCy: 'FilterLinkAll' },
+  { value: FilterType.all, href: '#/', label: 'All', dataCy: 'FilterLinkAll' },
   {
-    value: 'active',
+    value: FilterType.active,
     href: '#/active',
     label: 'Active',
     dataCy: 'FilterLinkActive',
   },
   {
-    value: 'completed',
+    value: FilterType.completed,
     href: '#/completed',
     label: 'Completed',
     dataCy: 'FilterLinkCompleted',

@@ -1,4 +1,4 @@
-export enum ErrorMessage {
+export const enum ErrorMessage {
   LOAD = 'Unable to load todos',
   TITLE = 'Title should not be empty',
   ADD = 'Unable to add a todo',

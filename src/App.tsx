@@ -4,9 +4,9 @@ import { ErrorNotification } from './components/ErrorNotification';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { TodoList } from './components/TodoList';
-import type { FilterType } from './types/FilterType';
+import { FilterType } from './types/FilterType';
 import { ErrorMessage } from './types/ErrorMessage';
-import { Todo } from './types/Todo';
+import type { Todo } from './types/Todo';
 import { UserWarning } from './UserWarning';
 
 const ERROR_TIMEOUT = 3000;
@@ -16,7 +16,7 @@ export const App: React.FC = () => {
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingTodoIds, setLoadingTodoIds] = useState<number[]>([]);
-  const [filter, setFilter] = useState<FilterType>('all');
+  const [filter, setFilter] = useState<FilterType>(FilterType.all);
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | null>(null);
 
   useEffect(() => {
@@ -114,11 +114,11 @@ export const App: React.FC = () => {
   };
 
   const visibleTodos = todos.filter(todo => {
-    if (filter === 'active') {
+    if (filter === FilterType.active) {
       return !todo.completed;
     }
 
-    if (filter === 'completed') {
+    if (filter === FilterType.completed) {
       return todo.completed;
     }
 
